@@ -1,0 +1,16 @@
+1.Black screen.
+Ans: I think for the current Bochs version, the BIOS should rather be at address=0xfffe0000 - at least that's what I have in my bochsrc file.
+
+2.>>PANIC<< bochsrc:10: vgaromimage directive malformed.(in bochsrc.txt)
+Ans:vgaromimage: file=/usr/share/vgabios/vgabios.bin
+
+3.Event type: PANIC Device: [ ] Message: dlopen failed for module 'x': file not found
+sudo apt-get install bochs-x
+
+Ans:sudo apt-get install bochs-x
+
+4.bochs-bin: symbol lookup error: /usr/lib/bochs/plugins/libbx_x.so: undefined symbol: XpmCreatePixmapFromData
+
+Ans:sudo apt-get install bochs-sdl
+    in bochsrc.txt add 
+    display_library: sdl
