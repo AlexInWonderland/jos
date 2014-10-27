@@ -3,18 +3,18 @@
 # The only one that needs changing is the assembler 
 # rule, as we use nasm instead of GNU as.
 
-SOURCES=boot.o main.o monitor.o common.o
+SOURCES=boot.o main.o memory.o monitor.o common.o descriptor_tables.o isr.o gdt.o interrupt.o
 
 CFLAGS=-std=gnu99 -ffreestanding -O2 -Wall -Wextra -Iheaders
 LDFLAGS=-T link.ld
-ASFLAGS=
+ASFLAGS=-felf
 
 all: $(SOURCES) link 
 
 clean:
 	-rm *.o kernel
 .s.o:
-	$(HOME)/opt/cross/bin/i686-elf-as $(ASFLAGS) $< -o $@
+	nasm $(ASFLAGS) $< 
 .c.o: 
 	$(HOME)/opt/cross/bin/i686-elf-gcc -c $(CFLAGS) $< -o $@
 

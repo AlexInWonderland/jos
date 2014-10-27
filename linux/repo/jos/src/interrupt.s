@@ -8,7 +8,7 @@
 %macro ISR_NOERRCODE 1
   global isr%1
   isr%1:
-    cli                         ; Disable interrupts firstly.
+    ;cli                         ; Disable interrupts firstly.
     push byte 0                 ; Push a dummy error code.
     push byte %1                ; Push the interrupt number.
     jmp isr_common_stub         ; Go to our common handler code.
@@ -19,7 +19,7 @@
 %macro ISR_ERRCODE 1
   global isr%1
   isr%1:
-    cli                         ; Disable interrupts.
+    ;cli                         ; Disable interrupts.
     push byte %1                ; Push the interrupt number
     jmp isr_common_stub
 %endmacro
@@ -63,28 +63,54 @@ extern isr_handler
 ; This is our common ISR stub. It saves the processor state, sets
 ; up for kernel mode segments, calls the C-level fault handler,
 ; and finally restores the stack frame.
+;isr_common_stub:
+;    pusha                    ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
+
+;    mov ax, ds               ; Lower 16-bits of eax = ds.
+;    push eax                 ; save the data segment descriptor
+
+;    mov ax, 0x10  ; load the kernel data segment descriptor
+;    mov ds, ax
+;    mov es, ax
+;    mov fs, ax
+;    mov gs, ax
+
+;    call isr_handler
+
+;    pop ebx        ; reload the original data segment descriptor
+;    mov ds, bx
+;    mov es, bx
+;    mov fs, bx
+;    mov gs, bx
+
+;    popa                     ; Pops edi,esi,ebp...
+;    add esp, 8     ; Cleans up the pushed error code and pushed ISR number
+;    sti
+;    iret           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
+
 isr_common_stub:
-    pusha                    ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
+    pusha
+    push ds
+    push es
+    push fs
+    push gs
 
-    mov ax, ds               ; Lower 16-bits of eax = ds.
-    push eax                 ; save the data segment descriptor
-
-    mov ax, 0x10  ; load the kernel data segment descriptor
+    mov ax, 0x10
     mov ds, ax
     mov es, ax
     mov fs, ax
     mov gs, ax
+    mov eax, esp
 
-    call isr_handler
+    push eax
+    mov eax, isr_handler
+    call eax
+    pop eax
 
-    pop ebx        ; reload the original data segment descriptor
-    mov ds, bx
-    mov es, bx
-    mov fs, bx
-    mov gs, bx
-
-    popa                     ; Pops edi,esi,ebp...
-    add esp, 8     ; Cleans up the pushed error code and pushed ISR number
-    sti
-    iret           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
-
+    pop gs
+    pop fs
+    pop es
+    pop ds
+    popa
+    add esp, 8
+    iret

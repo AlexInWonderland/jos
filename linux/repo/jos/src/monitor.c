@@ -151,5 +151,9 @@ void monitor_write_hex(u32int n)
 void monitor_write_dec(u32int n)
 {
     // TODO: implement this yourself!
+    u8int attribute = (0<<4) | (15&0x0f);
+    u16int *location;
+    location = video_memory + (cursor_y*80 + cursor_x);                     
+    *location = n | (attribute << 8); 
 }
 
